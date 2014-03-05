@@ -83,6 +83,13 @@ if(HAVE_OFF64_T)
 endif()
 set(CMAKE_REQUIRED_DEFINITIONS) # clear variable
 
+# Force Zlib names to be mangled to ensure
+# they do not conflict with other packages
+# such as QT
+
+add_definitions(-DZ_PREFIX)
+set(SCI_ZLIB_MANGLE 1 CACHE INTERNAL "Tell the system that we have a mangled zlib." FORCE)
+
 #
 # Check for fseeko
 #
