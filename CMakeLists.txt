@@ -31,13 +31,13 @@ project(zlib C)
 
 ########################################################################
 # Set the name of the library
-SET(SCI_ZLIB_LIBRARY boost CACHE INTERNAL "Boost library name." FORCE)
+SET(SCI_ZLIB_LIBRARY zlib CACHE INTERNAL "Boost library name.")
 
 
 ########################################################################
 # Include directory
 
-SET(SCI_ZLIB_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR} CACHE INTERNAL "Boost include directories." FORCE)
+SET(SCI_ZLIB_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR} CACHE INTERNAL "Boost include directories.")
 
 
 set(VERSION "1.2.8")
