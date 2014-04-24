@@ -31,13 +31,13 @@ project(zlib C)
 
 ########################################################################
 # Set the name of the library
-SET(SCI_ZLIB_LIBRARY zlib CACHE INTERNAL "Boost library name.")
+SET(SCI_ZLIB_LIBRARY z CACHE INTERNAL "Zlib library name.")
 
 
 ########################################################################
 # Include directory
 
-SET(SCI_ZLIB_INCLUDE ${CMAKE_CURRENT_SOURCE_DIR} CACHE INTERNAL "Boost include directories.")
+SET(SCI_ZLIB_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR};${CMAKE_CURRENT_BINARY_DIR}" CACHE INTERNAL "Zlib include directories.")
 
 
 set(VERSION "1.2.8")
@@ -87,8 +87,8 @@ set(CMAKE_REQUIRED_DEFINITIONS) # clear variable
 # they do not conflict with other packages
 # such as QT
 
-add_definitions(-DZ_PREFIX)
-set(SCI_ZLIB_MANGLE 1 CACHE INTERNAL "Tell the system that we have a mangled zlib." FORCE)
+#add_definitions(-DZ_PREFIX)
+#set(SCI_ZLIB_MANGLE 1 CACHE INTERNAL "Tell the system that we have a mangled zlib." FORCE)
 
 #
 # Check for fseeko
