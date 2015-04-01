@@ -258,6 +258,9 @@ if(UNIX)
 #    set_target_properties(zlib PROPERTIES SUFFIX "1.dll")
 endif()
 
+configure_file(ZlibConfig.cmake.in "${CMAKE_CURRENT_BINARY_DIR}/ZlibConfig.cmake" @ONLY)
+export(TARGETS ${SCI_ZLIB_LIBRARY} FILE ZlibExports.cmake)
+
 #if(NOT SKIP_INSTALL_LIBRARIES AND NOT SKIP_INSTALL_ALL )
 #    install(TARGETS zlib zlibstatic
 #        RUNTIME DESTINATION "${INSTALL_BIN_DIR}"
