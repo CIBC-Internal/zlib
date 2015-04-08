@@ -258,6 +258,9 @@ if(UNIX)
 #    set_target_properties(zlib PROPERTIES SUFFIX "1.dll")
 endif()
 
+set(SCI_ZLIB_LIBRARY_DIR ${CMAKE_CURRENT_BINARY_DIR})
+set(ZLIB_USE_FILE "${CMAKE_CURRENT_SOURCE_DIR}/UseZlib.cmake")
+
 configure_file(ZlibConfig.cmake.in "${CMAKE_CURRENT_BINARY_DIR}/ZlibConfig.cmake" @ONLY)
 export(TARGETS ${SCI_ZLIB_LIBRARY} FILE ZlibExports.cmake)
 
