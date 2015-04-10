@@ -87,8 +87,8 @@ set(CMAKE_REQUIRED_DEFINITIONS) # clear variable
 # they do not conflict with other packages
 # such as QT
 
-#add_definitions(-DZ_PREFIX)
-#set(SCI_ZLIB_MANGLE 1 CACHE INTERNAL "Tell the system that we have a mangled zlib." FORCE)
+add_definitions(-DZ_PREFIX)
+set(SCI_ZLIB_MANGLE ON CACHE INTERNAL "Tell the system that we have a mangled zlib." FORCE)
 
 #
 # Check for fseeko
