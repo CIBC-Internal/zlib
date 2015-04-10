@@ -4,6 +4,6 @@ endif()
 
 include_directories(${SCI_ZLIB_INCLUDE})
 link_directories(${SCI_ZLIB_LIBRARY_DIR})
-if (${SCI_ZLIB_MANGLE})
+if (SCI_ZLIB_MANGLE)
   add_definitions(-DZ_PREFIX)
 endif()
