@@ -1,17 +1,51 @@
+#  For more information, please see: http://software.sci.utah.edu
+#
+#  The MIT License
+#
+#  Copyright (c) 2012 Scientific Computing and Imaging Institute,
+#  University of Utah.
+#
+#
+#  Permission is hereby granted, free of charge, to any person obtaining a
+#  copy of this software and associated documentation files (the "Software"),
+#  to deal in the Software without restriction, including without limitation
+#  the rights to use, copy, modify, merge, publish, distribute, sublicense,
+#  and/or sell copies of the Software, and to permit persons to whom the
+#  Software is furnished to do so, subject to the following conditions:#
+#  The above copyright notice and this permission notice shall be included
+#  in all copies or substantial portions of the Software.
+#
+#  THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
+#  OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+#  FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL
+#  THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+#  LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING
+#  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
+#  DEALINGS IN THE SOFTWARE.
+
 cmake_minimum_required(VERSION 2.4.4...3.15.0)
 set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS ON)
 
 project(zlib C)
 
+########################################################################
+# Set the name of the library
+SET(SCI_ZLIB_LIBRARY z CACHE INTERNAL "Zlib library name.")
+
+########################################################################
+# Include directory
+
+SET(SCI_ZLIB_INCLUDE "${CMAKE_CURRENT_SOURCE_DIR};${CMAKE_CURRENT_BINARY_DIR}" CACHE INTERNAL "Zlib include directories.")
+
 set(VERSION "1.3.1")
 
-option(ZLIB_BUILD_EXAMPLES "Enable Zlib Examples" ON)
+#option(ZLIB_BUILD_EXAMPLES "Enable Zlib Examples" ON)
 
-set(INSTALL_BIN_DIR "${CMAKE_INSTALL_PREFIX}/bin" CACHE PATH "Installation directory for executables")
-set(INSTALL_LIB_DIR "${CMAKE_INSTALL_PREFIX}/lib" CACHE PATH "Installation directory for libraries")
-set(INSTALL_INC_DIR "${CMAKE_INSTALL_PREFIX}/include" CACHE PATH "Installation directory for headers")
-set(INSTALL_MAN_DIR "${CMAKE_INSTALL_PREFIX}/share/man" CACHE PATH "Installation directory for manual pages")
-set(INSTALL_PKGCONFIG_DIR "${CMAKE_INSTALL_PREFIX}/share/pkgconfig" CACHE PATH "Installation directory for pkgconfig (.pc) files")
+#set(INSTALL_BIN_DIR "${CMAKE_INSTALL_PREFIX}/bin" CACHE PATH "Installation directory for executables")
+#set(INSTALL_LIB_DIR "${CMAKE_INSTALL_PREFIX}/lib" CACHE PATH "Installation directory for libraries")
+#set(INSTALL_INC_DIR "${CMAKE_INSTALL_PREFIX}/include" CACHE PATH "Installation directory for headers")
+#set(INSTALL_MAN_DIR "${CMAKE_INSTALL_PREFIX}/share/man" CACHE PATH "Installation directory for manual pages")
+#set(INSTALL_PKGCONFIG_DIR "${CMAKE_INSTALL_PREFIX}/share/pkgconfig" CACHE PATH "Installation directory for pkgconfig (.pc) files")
 
 include(CheckTypeSize)
 include(CheckFunctionExists)
@@ -45,6 +79,15 @@ if(HAVE_OFF64_T)
 endif()
 set(CMAKE_REQUIRED_DEFINITIONS) # clear variable
 
+# Force Zlib names to be mangled to ensure
+# they do not conflict with other packages
+# such as QT
+
+option(DO_ZLIB_MANGLE "Mangle Zlib names" ON)
+if (DO_ZLIB_MANGLE)
+  add_definitions(-DZ_PREFIX)
+endif()
+
 #
 # Check for fseeko
 #
@@ -59,7 +102,7 @@ endif()
 check_include_file(unistd.h Z_HAVE_UNISTD_H)
 
 if(MSVC)
-    set(CMAKE_DEBUG_POSTFIX "d")
+    #set(CMAKE_DEBUG_POSTFIX "d")
     add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
     add_definitions(-D_CRT_NONSTDC_NO_DEPRECATE)
     include_directories(${CMAKE_CURRENT_SOURCE_DIR})
@@ -149,12 +192,15 @@ if(MINGW)
     set(ZLIB_DLL_SRCS ${CMAKE_CURRENT_BINARY_DIR}/zlib1rc.obj)
 endif(MINGW)
 
-add_library(zlib SHARED ${ZLIB_SRCS} ${ZLIB_DLL_SRCS} ${ZLIB_PUBLIC_HDRS} ${ZLIB_PRIVATE_HDRS})
-target_include_directories(zlib PUBLIC ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
-add_library(zlibstatic STATIC ${ZLIB_SRCS} ${ZLIB_PUBLIC_HDRS} ${ZLIB_PRIVATE_HDRS})
-target_include_directories(zlibstatic PUBLIC ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
-set_target_properties(zlib PROPERTIES DEFINE_SYMBOL ZLIB_DLL)
-set_target_properties(zlib PROPERTIES SOVERSION 1)
+#add_library(zlib SHARED ${ZLIB_SRCS} ${ZLIB_DLL_SRCS} ${ZLIB_PUBLIC_HDRS} ${ZLIB_PRIVATE_HDRS})
+#target_include_directories(zlib PUBLIC ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
+#add_library(zlibstatic STATIC ${ZLIB_SRCS} ${ZLIB_PUBLIC_HDRS} ${ZLIB_PRIVATE_HDRS})
+#target_include_directories(zlibstatic PUBLIC ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR})
+#set_target_properties(zlib PROPERTIES DEFINE_SYMBOL ZLIB_DLL)
+#set_target_properties(zlib PROPERTIES SOVERSION 1)
+
+# force static build
+add_library(${SCI_ZLIB_LIBRARY} ${ZLIB_SRCS} ${ZLIB_ASMS} ${ZLIB_PUBLIC_HDRS} ${ZLIB_PRIVATE_HDRS})
 
 if(NOT CYGWIN)
     # This property causes shared libraries on Linux to have the full version
@@ -169,50 +215,57 @@ endif()
 
 if(UNIX)
     # On unix-like platforms the library is almost always called libz
-   set_target_properties(zlib zlibstatic PROPERTIES OUTPUT_NAME z)
+   # set_target_properties(zlib zlibstatic PROPERTIES OUTPUT_NAME z)
+   set_target_properties(${SCI_ZLIB_LIBRARY} PROPERTIES OUTPUT_NAME z)
    if(NOT APPLE AND NOT(CMAKE_SYSTEM_NAME STREQUAL AIX))
-     set_target_properties(zlib PROPERTIES LINK_FLAGS "-Wl,--version-script,\"${CMAKE_CURRENT_SOURCE_DIR}/zlib.map\"")
+     set_target_properties(${SCI_ZLIB_LIBRARY} PROPERTIES LINK_FLAGS "-Wl,--version-script,\"${CMAKE_CURRENT_SOURCE_DIR}/zlib.map\"")
    endif()
-elseif(BUILD_SHARED_LIBS AND WIN32)
+#elseif(BUILD_SHARED_LIBS AND WIN32)
     # Creates zlib1.dll when building shared library version
-    set_target_properties(zlib PROPERTIES SUFFIX "1.dll")
+#    set_target_properties(zlib PROPERTIES SUFFIX "1.dll")
 endif()
 
-if(NOT SKIP_INSTALL_LIBRARIES AND NOT SKIP_INSTALL_ALL )
-    install(TARGETS zlib zlibstatic
-        RUNTIME DESTINATION "${INSTALL_BIN_DIR}"
-        ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
-        LIBRARY DESTINATION "${INSTALL_LIB_DIR}" )
-endif()
-if(NOT SKIP_INSTALL_HEADERS AND NOT SKIP_INSTALL_ALL )
-    install(FILES ${ZLIB_PUBLIC_HDRS} DESTINATION "${INSTALL_INC_DIR}")
-endif()
-if(NOT SKIP_INSTALL_FILES AND NOT SKIP_INSTALL_ALL )
-    install(FILES zlib.3 DESTINATION "${INSTALL_MAN_DIR}/man3")
-endif()
-if(NOT SKIP_INSTALL_FILES AND NOT SKIP_INSTALL_ALL )
-    install(FILES ${ZLIB_PC} DESTINATION "${INSTALL_PKGCONFIG_DIR}")
-endif()
+set(SCI_ZLIB_LIBRARY_DIR ${CMAKE_CURRENT_BINARY_DIR})
+set(ZLIB_USE_FILE "${CMAKE_CURRENT_SOURCE_DIR}/UseZlib.cmake")
+
+configure_file(ZlibConfig.cmake.in "${CMAKE_CURRENT_BINARY_DIR}/ZlibConfig.cmake" @ONLY)
+export(TARGETS ${SCI_ZLIB_LIBRARY} FILE ZlibExports.cmake)
+
+#if(NOT SKIP_INSTALL_LIBRARIES AND NOT SKIP_INSTALL_ALL )
+#    install(TARGETS zlib zlibstatic
+#        RUNTIME DESTINATION "${INSTALL_BIN_DIR}"
+#        ARCHIVE DESTINATION "${INSTALL_LIB_DIR}"
+#        LIBRARY DESTINATION "${INSTALL_LIB_DIR}" )
+#endif()
+#if(NOT SKIP_INSTALL_HEADERS AND NOT SKIP_INSTALL_ALL )
+#    install(FILES ${ZLIB_PUBLIC_HDRS} DESTINATION "${INSTALL_INC_DIR}")
+#endif()
+#if(NOT SKIP_INSTALL_FILES AND NOT SKIP_INSTALL_ALL )
+#    install(FILES zlib.3 DESTINATION "${INSTALL_MAN_DIR}/man3")
+#endif()
+#if(NOT SKIP_INSTALL_FILES AND NOT SKIP_INSTALL_ALL )
+#    install(FILES ${ZLIB_PC} DESTINATION "${INSTALL_PKGCONFIG_DIR}")
+#endif()
 
 #============================================================================
 # Example binaries
 #============================================================================
-if(ZLIB_BUILD_EXAMPLES)
-    add_executable(example test/example.c)
-    target_link_libraries(example zlib)
-    add_test(example example)
-
-    add_executable(minigzip test/minigzip.c)
-    target_link_libraries(minigzip zlib)
-
-    if(HAVE_OFF64_T)
-        add_executable(example64 test/example.c)
-        target_link_libraries(example64 zlib)
-        set_target_properties(example64 PROPERTIES COMPILE_FLAGS "-D_FILE_OFFSET_BITS=64")
-        add_test(example64 example64)
-
-        add_executable(minigzip64 test/minigzip.c)
-        target_link_libraries(minigzip64 zlib)
-        set_target_properties(minigzip64 PROPERTIES COMPILE_FLAGS "-D_FILE_OFFSET_BITS=64")
-    endif()
-endif()
+#if(ZLIB_BUILD_EXAMPLES)
+#    add_executable(example test/example.c)
+#    target_link_libraries(example zlib)
+#    add_test(example example)
+#
+#    add_executable(minigzip test/minigzip.c)
+#    target_link_libraries(minigzip zlib)
+#
+#    if(HAVE_OFF64_T)
+#        add_executable(example64 test/example.c)
+#        target_link_libraries(example64 zlib)
+#        set_target_properties(example64 PROPERTIES COMPILE_FLAGS "-D_FILE_OFFSET_BITS=64")
+#        add_test(example64 example64)
+#
+#        add_executable(minigzip64 test/minigzip.c)
+#        target_link_libraries(minigzip64 zlib)
+#        set_target_properties(minigzip64 PROPERTIES COMPILE_FLAGS "-D_FILE_OFFSET_BITS=64")
+#    endif()
+#endif()
