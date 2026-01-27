@@ -23,7 +23,7 @@
 #  FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER
 #  DEALINGS IN THE SOFTWARE.   
 
-cmake_minimum_required(VERSION 2.4.4)
+cmake_minimum_required(VERSION 3.16)
 set(CMAKE_ALLOW_LOOSE_LOOP_CONSTRUCTS ON)
 
 project(zlib C)
@@ -266,6 +266,17 @@ set(ZLIB_USE_FILE "${CMAKE_CURRENT_SOURCE_DIR}/UseZlib.cmake")
 configure_file(ZlibConfig.cmake.in "${CMAKE_CURRENT_BINARY_DIR}/ZlibConfig.cmake" @ONLY)
 export(TARGETS ${SCI_ZLIB_LIBRARY} FILE ZlibExports.cmake)
 
+# Install the zlib libraries
+install(TARGETS zlib zlibstatic
+  ARCHIVE DESTINATION lib
+  LIBRARY DESTINATION lib
+  RUNTIME DESTINATION bin
+)
+
+# Install public headers
+install(FILES ${ZLIB_PUBLIC_HDRS}
+  DESTINATION include/zlib
+)
 #if(NOT SKIP_INSTALL_LIBRARIES AND NOT SKIP_INSTALL_ALL )
 #    install(TARGETS zlib zlibstatic
 #        RUNTIME DESTINATION "${INSTALL_BIN_DIR}"
